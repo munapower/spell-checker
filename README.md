@@ -15,6 +15,8 @@
 
 ## Usage
 
+wong wat
+
 Create a `.github/workflows/spell-checker.yml` file in the repository you want to install this action:
 
 ```yml
