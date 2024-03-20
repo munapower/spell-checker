@@ -3,10 +3,14 @@ import minimatch from 'minimatch'
 import parseInputs from '@wow-actions/parse-inputs'
 import { getChangedFiles, getOctokit, createCheck, spellCheck } from './util'
 
-export async function run() {
+export async function run(): Promise<void> {
   try {
+    core.setCommandEcho(true)
+    core.debug('before getOctokit')
     const octokit = getOctokit()
+    core.debug('after getOctokit')
     const changedFiles = await getChangedFiles(octokit)
+    core.debug('after ChangedFiles')
     const { include, exclude } = parseInputs({
       include: { type: 'stringArray' },
       exclude: { type: 'stringArray' },
@@ -53,8 +57,11 @@ export async function run() {
           summary: `Files: ${JSON.stringify(filenames, null, 2)}`,
         },
       })
-
-      await spellCheck(octokit, data.id, targetFiles)
+      core.debug('before spellcheck')
+      const findings = await spellCheck(octokit, data.id, targetFiles)
+      const findingsJson = JSON.stringify(findings)
+      core.info(`Findings output set to ${findingsJson}`)
+      core.setOutput('findings', findingsJson)
     }
   } catch (e) {
     core.error(e)

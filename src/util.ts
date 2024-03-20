@@ -1,25 +1,30 @@
 import * as core from '@actions/core'
 import * as github from '@actions/github'
+import { RequestError } from '@octokit/request-error'
 import { parsePatch } from './patch'
 import { check } from './providers'
 
 export type Octokit = ReturnType<typeof getOctokit>
 
 export function getOctokit() {
+  // core.debug('before getInput')
   const token = core.getInput('GITHUB_TOKEN', { required: true })
+  // core.debug('token: '+token)
   return github.getOctokit(token)
 }
 
 async function findPR(octokit: Octokit) {
   const { context } = github
-  const payload = context.payload
+  const payload = context.payload.event
   const eventName = context.eventName
   if (eventName === 'pull_request') {
     return payload.pull_request!
   }
 
   if (eventName === 'push') {
+    core.debug(`payload:${JSON.stringify(payload)}`)
     const headCommit = payload.head_commit
+    core.debug(`headCommit:${JSON.stringify(headCommit)}`)
     const list = (page?: number) =>
       octokit.rest.pulls.list({
         ...context.repo,
@@ -63,13 +68,16 @@ export async function getChangedFiles(octokit: Octokit) {
   let head: string | undefined
 
   if (eventName === 'pull_request' || eventName === 'push') {
+    core.debug('before findpr')
     const pr = await findPR(octokit)
+    core.debug('after findpr')
     if (pr) {
       base = pr.base.sha
       head = pr.head.sha
     } else {
-      base = context.payload.before
-      head = context.payload.after
+      core.debug(`context:${JSON.stringify(context)}`)
+      base = context.payload.event.before
+      head = context.payload.event.after
     }
   } else {
     throw new Error(
@@ -145,14 +153,24 @@ export async function createCheck(
   const pr = context.payload.pull_request
   const sha = pr ? pr.head.sha : context.payload.after
   const ref = pr ? pr.head.ref : context.payload.ref
-
-  return octokit.rest.checks.create({
-    ...github.context.repo,
-    name: CHECK_NAME,
-    head_sha: sha,
-    head_branch: ref,
-    ...meta,
-  })
+  try {
+    // const octokit = getOctokit()
+    core.debug('before create')
+    const result = await octokit.rest.checks.create({
+      ...github.context.repo,
+      name: CHECK_NAME,
+      head_sha: sha,
+      head_branch: ref,
+      ...meta,
+    })
+    return result
+  } catch (error) {
+    if (error instanceof RequestError && error.status === 403) {
+      // throw new ActionError(FailReason.MISSING_CHECKS_PERMISSION);
+      core.debug(`error message missing checks permission${error.message}`)
+    }
+    throw error
+  }
 }
 
 async function getFileContent(octokit: Octokit, filename: string) {
