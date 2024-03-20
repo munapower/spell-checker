@@ -3,11 +3,34 @@ on: push
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
     steps:
+      - uses: hmarr/debug-action@v2
       - name: ⤵️　Checkout
         uses: actions/checkout@v3
-
-      - name: 🚀　Build
-        run: yarn run build
-
+      - name: Set Node.js 16.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - name: Run install
+        uses: Borales/actions-yarn@v5.0.0
+        with:
+          cmd: install # will run `yarn install` command
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # if needed
+      - name: 🚀　Build bundle
+        uses: Borales/actions-yarn@v5.0.0
+        with:
+          cmd: run build
+          dir: ./
       - uses: ./
+        with:
+          GITHUB_TOKEN:  ${{ env.GITHUB_TOKEN }}
+          include: |
+            **.md
+
+#      - name: 🚀　Build
+#        run: yarn run build
+#      - uses: ./
