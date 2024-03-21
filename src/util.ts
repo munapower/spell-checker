@@ -307,4 +307,5 @@ export async function spellCheck(
       },
     })
   }
+  return summary
 }

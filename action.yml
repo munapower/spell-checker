@@ -18,8 +18,14 @@ inputs:
     description: File patterns to exclude files match checked files
     required: false
   markdown-spellcheck:
+    description: markdown-spellcheck
     required: false
   write-good:
+    description: write-good spellcheck
     required: false
   alex:
+    description: alex spell check
     required: false
+outputs:
+  annotations:
+    description: list of errors found
