@@ -76,8 +76,8 @@ export async function getChangedFiles(octokit: Octokit) {
       head = pr.head.sha
     } else {
       core.debug(`context:${JSON.stringify(context)}`)
-      base = context.payload.event.before
-      head = context.payload.event.after
+      base = context.payload.before
+      head = context.payload.after
     }
   } else {
     throw new Error(
