@@ -15,12 +15,12 @@ jobs:
     steps:
       - uses: hmarr/debug-action@v2
       - uses: actions/checkout@v3
-#      - name: 🚧　Install
-#        run: |
-#          yarn install
-#      - name: 📦　Build
-#        run: |
-#          yarn build
+      - name: 🚧　Install
+        run: |
+          yarn install
+      - name: 📦　Build
+        run: |
+          yarn build
 #      - name: 🔑　Generate Token
 #        uses: wow-actions/use-app-token@v2
 #        with:
