@@ -15,7 +15,7 @@ export function getOctokit() {
 
 async function findPR(octokit: Octokit) {
   const { context } = github
-  const payload = context.payload.event
+  const payload = context.payload
   const eventName = context.eventName
   if (eventName === 'pull_request') {
     return payload.pull_request!
