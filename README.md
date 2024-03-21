@@ -15,7 +15,7 @@
 
 ## Usage
 
-wong wat fobidfden qest finel Create a `.github/workflows/spell-checker.yml` file in the repository you want to install this action:
+wong wat fobidfden qest Create a `.github/workflows/spell-checker.yml` file in the repository you want to install this action:
 
 ```yml
 name: Spell Checker
